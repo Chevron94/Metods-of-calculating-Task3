@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Globalization;
 
 namespace Task3
 {
@@ -19,6 +20,8 @@ namespace Task3
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Result.Rows.Clear();
+            Result.RowCount = 12;
             int[] dimention = { 10, 30, 50 };
             int[] range = { 2, 50 };
             int[] eps = { -5, -8 };
@@ -32,16 +35,18 @@ namespace Task3
                     for(int k = 0; k<2; k++)
                     {
                         Solver slv = new Solver(dimention[i], range[j], 1000, eps[k]);
-                        slv.FormAnswer(20, ref avg_lambda, ref avg_vec, ref r, ref iter);
-                        Result.Rows[count].Cells[4].Value = avg_lambda;
-                        Result.Rows[count].Cells[5].Value = avg_vec;
-                        Result.Rows[count].Cells[6].Value = r;
+                        slv.FormAnswer(50, ref avg_lambda, ref avg_vec, ref r, ref iter);
+                        Result.Rows[count].Cells[4].Value = avg_lambda.ToString("E2");
+                        Result.Rows[count].Cells[5].Value = avg_vec.ToString("E2");
+                        Result.Rows[count].Cells[6].Value = r.ToString("E2");
                         Result.Rows[count].Cells[7].Value = iter;
-                        Result.Rows[count].Cells[0].Value = 4 * i + 2 * j + 2 * k + 1;
+                        Result.Rows[count].Cells[0].Value = count+1;
                         Result.Rows[count].Cells[1].Value = dimention[i];
-                        Result.Rows[count].Cells[2].Value = range[j];
-                        Result.Rows[count].Cells[3].Value = eps[k];
+                        Result.Rows[count].Cells[2].Value = "[ -"+range[j].ToString()+" ; "+ range[j].ToString() + " ]";
+                        Result.Rows[count].Cells[3].Value = Math.Pow(10, eps[k]).ToString("E2"); 
                         count++;
+                        Application.DoEvents();
+
                     }
                 }
                 
