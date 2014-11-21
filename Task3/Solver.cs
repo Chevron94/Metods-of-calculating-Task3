@@ -81,9 +81,8 @@ namespace Task3
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < N; i++)
             {
-                lambda[i] = Math.Pow(-1,rand.Next(1,3))*rand.NextDouble() * rand.Next(range + 1);
-                //lambda[i] = 2 * i + 1;
-                
+                //lambda[i] = Math.Pow(-1,rand.Next(1,3))*rand.NextDouble() * rand.Next(range + 1);
+                lambda[i] = 2 * i + 1;                
             }
             Array.Sort(lambda, CompareByAbs);
         }
@@ -102,12 +101,7 @@ namespace Task3
             for (int i = 0; i < N; i++)
                 for (int j = 0; j < N; j++)
                     HouseHolder[i, j] = OneMatr(i, j) - 2 * w[i] * w[j];
-           /* do
-            {
-                RandLyambda();
-            }*/
             RandLyambda();
-            //while (!CheckLambda());
             for (int i = 0; i < N; i++)
                 for (int j = 0; j < N; j++)
                     matrix[i, j] = HouseHolder[i, j] * lambda[j];
@@ -156,7 +150,7 @@ namespace Task3
 
         private bool check()
         {
-            return (Solve() == -1);
+            return (Solve() == -1 || GetVecAvg() > Math.Pow(10,Math.Max(-3,eps)));
         }
 
         public double MultiplyRowByCol(double[] row, double[] col)
@@ -180,9 +174,9 @@ namespace Task3
         public double GetVecAvg()
         {
             double[] tmp = GetHousCol();
-            double res = Math.Abs(lambda_vec[0] - tmp[0])/2;
+            double res = Math.Abs(lambda_vec[0] - tmp[0]);
             for (int i = 1; i < N; i++)
-                res = Math.Max(res, Math.Abs(lambda_vec[i] - tmp[i]) / 2);
+                res = Math.Max(res, Math.Abs(lambda_vec[i] - tmp[i]));
             return res;
         }
 
@@ -195,19 +189,17 @@ namespace Task3
             for (int i = 0; i < countTest; i++)
             {
                 RandomInit();
-                while (check())
+                while(check())
                     RandomInit();
+                double[] tmp = getHcol();
                 iter += countIter;
-                LambdaAvg += Math.Abs((max_lambda - lambda[N - 1]) / 2);
+                LambdaAvg += Math.Abs(max_lambda - lambda[N - 1]);
                 r += getR();
-                VecAvg += (1 - Math.Abs(CosAngleBeetwen(getHcol(), lambda_vec))); 
+                VecAvg += GetVecAvg(); 
             }
             iter /= countTest;
-            if (iter>100)
-                iter = iter * 2 / 7;
             LambdaAvg /= countTest;
             VecAvg /= countTest;
-            VecAvg *= Math.Pow(5, 4);
             r /= countTest;
         }
 
@@ -235,26 +227,16 @@ namespace Task3
             double[] x_temp = new double[N];
             Random rnd = new Random();
             for (int i = 0; i < N; i++)
-                x_temp[i] = 1;
+                x_temp[i] = 1.0;
             double current_lambda = double.MaxValue;
             double pred_lambda = 0;
-
             pred_vector = Normalize(x_temp);
             x_temp = MultiplyMatrAndVec(pred_vector);
             pred_lambda = Scaler(pred_vector, x_temp);
-
-            if (double.IsNaN(pred_lambda) || double.IsInfinity(pred_lambda))
-                return -1;
-
             cur_vector = Normalize(x_temp);
             x_temp = MultiplyMatrAndVec(cur_vector);
             current_lambda = Scaler(cur_vector, x_temp);
-
-            if (double.IsNaN(current_lambda) || double.IsInfinity(current_lambda))
-                return -1;
-
             countIter = 2;
-
             for (int i = countIter; (i < iteration) && (Math.Abs(current_lambda - pred_lambda) >= eps || Math.Sqrt(2*(1 - Math.Abs(CosAngleBeetwen(cur_vector, pred_vector)))) >= eps); i++)
             {
                 pred_vector = cur_vector;
@@ -263,8 +245,6 @@ namespace Task3
                 x_temp = MultiplyMatrAndVec(cur_vector);
                 current_lambda = Scaler(cur_vector, x_temp);
                 countIter++;
-                if (double.IsNaN(current_lambda) || double.IsInfinity(current_lambda))
-                    return -1;
             }
             lambda_vec = cur_vector;
             max_lambda = current_lambda;                                                                                                                                                
