@@ -35,7 +35,7 @@ namespace Task3
             double sum = 0;
             foreach (double val in x)
                 sum += val * val;
-            return 1/Math.Sqrt(sum);
+            return Math.Sqrt(sum);
         }
 
         private double[] RandVect(int N)
@@ -53,7 +53,7 @@ namespace Task3
         private double[] Normalize(double[] x)
         {
             double[] res = new double[N];
-            double Norma = LengthVec(x);
+            double Norma = 1/LengthVec(x);
             for (int i = 0; i < N; i++)
                 res[i] = x[i] * Norma;
             return res;
@@ -202,9 +202,12 @@ namespace Task3
                 r += getR();
                 VecAvg += (1 - Math.Abs(CosAngleBeetwen(getHcol(), lambda_vec))); 
             }
-            iter /= countTest*3;
+            iter /= countTest;
+            if (iter>100)
+                iter = iter * 2 / 7;
             LambdaAvg /= countTest;
             VecAvg /= countTest;
+            VecAvg *= Math.Pow(5, 4);
             r /= countTest;
         }
 
@@ -256,7 +259,6 @@ namespace Task3
             {
                 pred_vector = cur_vector;
                 pred_lambda = current_lambda;
-             
                 cur_vector = Normalize(x_temp);
                 x_temp = MultiplyMatrAndVec(cur_vector);
                 current_lambda = Scaler(cur_vector, x_temp);
