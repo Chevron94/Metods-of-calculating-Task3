@@ -1,0 +1,8 @@
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\bin\Release\Task3.exe
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\bin\Release\Task3.pdb
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\obj\x86\Release\Task3.Form1.resources
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\obj\x86\Release\Task3.Properties.Resources.resources
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\obj\x86\Release\Task3.csproj.GenerateResource.Cache
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\obj\x86\Release\Task3.exe
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\obj\x86\Release\Task3.pdb
+D:\Labs\3 курс\1 семестр\МВ\Task3\Task3\obj\x86\Release\Task3.csprojResolveAssemblyReference.cache

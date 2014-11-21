@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Task3
 {
@@ -34,7 +35,7 @@ namespace Task3
             double sum = 0;
             foreach (double val in x)
                 sum += val * val;
-            return Math.Sqrt(sum);
+            return 1/Math.Sqrt(sum);
         }
 
         private double[] RandVect(int N)
@@ -42,16 +43,17 @@ namespace Task3
             double[] x = new double[N];
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < N; i++)
-                x[i] = 200 * rand.NextDouble() - 100;
+            {
+                x[i] = Math.Pow(-1, i) * rand.NextDouble() * rand.Next(50); ;
+               // Thread.Sleep(0);
+            }
             return x;
         }
 
         private double[] Normalize(double[] x)
         {
-            int N = x.Length;
             double[] res = new double[N];
             double Norma = LengthVec(x);
-            Norma = 1 / Norma;
             for (int i = 0; i < N; i++)
                 res[i] = x[i] * Norma;
             return res;
@@ -78,14 +80,18 @@ namespace Task3
         {
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < N; i++)
-                lambda[i] = 2 * (rand.NextDouble() - 0.5) * range;
+            {
+                lambda[i] = Math.Pow(-1,rand.Next(1,3))*rand.NextDouble() * rand.Next(range + 1);
+                //lambda[i] = 2 * i + 1;
+                
+            }
             Array.Sort(lambda, CompareByAbs);
         }
 
         private bool CheckLambda()
         {
             for (int i = 0; i < N - 1; i++)
-                if (lambda[i] == lambda[i+1])
+                if (lambda[i] == lambda[i+1]) 
                     return false;
             return true;
         }
@@ -93,15 +99,15 @@ namespace Task3
         private void RandomInit()
         {
             double[] w = Normalize(RandVect(N));
-            w = Normalize(w);
             for (int i = 0; i < N; i++)
                 for (int j = 0; j < N; j++)
-                    HouseHolder[i, j] = OneMatr(i, j) - 2 * w[i] * w[i];
-            do
+                    HouseHolder[i, j] = OneMatr(i, j) - 2 * w[i] * w[j];
+           /* do
             {
                 RandLyambda();
-            }
-            while (!CheckLambda());
+            }*/
+            RandLyambda();
+            //while (!CheckLambda());
             for (int i = 0; i < N; i++)
                 for (int j = 0; j < N; j++)
                     matrix[i, j] = HouseHolder[i, j] * lambda[j];
@@ -138,19 +144,21 @@ namespace Task3
             return cos;
         }
 
-        public static double Scaler(double[] x1, double[] x2)
+        public double Scaler(double[] x1, double[] x2)
         {
-            int len2 = x2.Length;
-            int len1 = x1.Length;
-            if (len1 != len2)
-                return Double.NaN;
             double res = 0;
-            for (int i = 0; i < len1; i++)
+            for (int i = 0; i < N; i++)
             {
                 res += x1[i] * x2[i];
             }
             return res;
         }
+
+        private bool check()
+        {
+            return (Solve() == -1);
+        }
+
         public double MultiplyRowByCol(double[] row, double[] col)
         {
             double res = 0;
@@ -161,7 +169,24 @@ namespace Task3
             return res;
         }
 
-        public void FormAnswer(int countTest,ref double LambdaAvg, ref double VecAvg, ref double r, ref int iter)
+        public double[] GetHousCol()
+        {
+            double[] res = new double[N];
+            for (int i = 0; i < N; i++)
+                res[i] = HouseHolder[i, N-1];
+            return res;
+        }
+
+        public double GetVecAvg()
+        {
+            double[] tmp = GetHousCol();
+            double res = Math.Abs(lambda_vec[0] - tmp[0])/2;
+            for (int i = 1; i < N; i++)
+                res = Math.Max(res, Math.Abs(lambda_vec[i] - tmp[i]) / 2);
+            return res;
+        }
+
+        public void FormAnswer(int countTest, ref double LambdaAvg, ref double VecAvg, ref double r, ref int iter)
         {
             LambdaAvg = 0;
             VecAvg = 0;
@@ -169,13 +194,15 @@ namespace Task3
             iter = 0;
             for (int i = 0; i < countTest; i++)
             {
-                while(Solve() == -1);
+                RandomInit();
+                while (check())
+                    RandomInit();
                 iter += countIter;
-                LambdaAvg += Math.Abs((max_lambda - lambda[N - 1]) / lambda[N - 1]);
+                LambdaAvg += Math.Abs((max_lambda - lambda[N - 1]) / 2);
                 r += getR();
-                VecAvg += getAvgVector();
+                VecAvg += (1 - Math.Abs(CosAngleBeetwen(getHcol(), lambda_vec))); 
             }
-            iter /= countTest;
+            iter /= countTest*3;
             LambdaAvg /= countTest;
             VecAvg /= countTest;
             r /= countTest;
@@ -189,17 +216,6 @@ namespace Task3
             return res;
         }
 
-        public double getAvgVector()
-        {
-            return (1 - Math.Abs(CosAngleBeetwen(getHcol(), lambda_vec)));
-            //double res = double.MinValue;
-            //for (int i = 0; i < N; i++)
-            //{
-            //    res = Math.Max(res, Math.Abs(HouseHolder[i, 0] - lambda_vec[i]));
-            //}
-            //return res;
-        }
-
         public double getR()
         {
             double[] vectorTmp = new double[N];
@@ -211,45 +227,45 @@ namespace Task3
 
         public int Solve()
         {
-            RandomInit();
             double[] pred_vector = new double[N];
             double[] cur_vector = new double[N];
             double[] x_temp = new double[N];
+            Random rnd = new Random();
             for (int i = 0; i < N; i++)
                 x_temp[i] = 1;
             double current_lambda = double.MaxValue;
-            double pred_lambda;
+            double pred_lambda = 0;
 
             pred_vector = Normalize(x_temp);
             x_temp = MultiplyMatrAndVec(pred_vector);
-            pred_lambda = MultiplyRowByCol(pred_vector, x_temp);
+            pred_lambda = Scaler(pred_vector, x_temp);
 
             if (double.IsNaN(pred_lambda) || double.IsInfinity(pred_lambda))
                 return -1;
 
             cur_vector = Normalize(x_temp);
             x_temp = MultiplyMatrAndVec(cur_vector);
-            current_lambda = MultiplyRowByCol(cur_vector, x_temp);
+            current_lambda = Scaler(cur_vector, x_temp);
 
             if (double.IsNaN(current_lambda) || double.IsInfinity(current_lambda))
                 return -1;
 
             countIter = 2;
 
-            for (int i = 0; (i < iteration) && (Math.Abs(current_lambda - pred_lambda) >= eps || Math.Abs(1-CosAngleBeetwen(pred_vector, cur_vector)) >= eps); i++)
+            for (int i = countIter; (i < iteration) && (Math.Abs(current_lambda - pred_lambda) >= eps || Math.Sqrt(2*(1 - Math.Abs(CosAngleBeetwen(cur_vector, pred_vector)))) >= eps); i++)
             {
                 pred_vector = cur_vector;
                 pred_lambda = current_lambda;
              
                 cur_vector = Normalize(x_temp);
                 x_temp = MultiplyMatrAndVec(cur_vector);
-                current_lambda = MultiplyRowByCol(cur_vector, x_temp);
+                current_lambda = Scaler(cur_vector, x_temp);
                 countIter++;
                 if (double.IsNaN(current_lambda) || double.IsInfinity(current_lambda))
                     return -1;
             }
             lambda_vec = cur_vector;
-            max_lambda = current_lambda;
+            max_lambda = current_lambda;                                                                                                                                                
             return countIter;
         }
     }

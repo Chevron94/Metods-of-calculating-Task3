@@ -24,7 +24,7 @@ namespace Task3
             Result.RowCount = 12;
             int[] dimention = { 10, 30, 50 };
             int[] range = { 2, 50 };
-            int[] eps = { -5, -8 };
+            int[] eps = { -6, -6 };
             double avg_lambda=0, avg_vec=0, r=0;
             int iter=0;
             int count = 0;
@@ -35,7 +35,7 @@ namespace Task3
                     for(int k = 0; k<2; k++)
                     {
                         Solver slv = new Solver(dimention[i], range[j], 1000, eps[k]);
-                        slv.FormAnswer(50, ref avg_lambda, ref avg_vec, ref r, ref iter);
+                        slv.FormAnswer(100, ref avg_lambda, ref avg_vec, ref r, ref iter);
                         Result.Rows[count].Cells[4].Value = avg_lambda.ToString("E2");
                         Result.Rows[count].Cells[5].Value = avg_vec.ToString("E2");
                         Result.Rows[count].Cells[6].Value = r.ToString("E2");
