@@ -14,12 +14,14 @@ namespace Task3
         double max_lambda;
         double[,] HouseHolder;
         double eps;
+        double cnt;
         int iteration;
         int countIter;
         int N;
         int range;
         public Solver(int N, int range,int iteration,double eps)
         {
+            cnt = eps;
             this.eps = Math.Pow(10,eps);
             this.iteration = iteration;
             this.N = N;
@@ -45,7 +47,7 @@ namespace Task3
             for (int i = 0; i < N; i++)
             {
                 x[i] = Math.Pow(-1, i) * rand.NextDouble() * rand.Next(50); ;
-               // Thread.Sleep(0);
+                Thread.Sleep(0);
             }
             return x;
         }
@@ -81,18 +83,12 @@ namespace Task3
             Random rand = new Random(DateTime.Now.Millisecond);
             for (int i = 0; i < N; i++)
             {
-                //lambda[i] = Math.Pow(-1,rand.Next(1,3))*rand.NextDouble() * rand.Next(range + 1);
-                lambda[i] = 2 * i + 1;                
+                lambda[i] = Math.Pow(-1,rand.Next(1,3))*rand.NextDouble() * rand.Next(range + 1);
+                //lambda[i] = 10 * (i + 1);
+                Thread.Sleep(0);
             }
+            //lambda[N - 1] = lambda[N - 1] ;
             Array.Sort(lambda, CompareByAbs);
-        }
-
-        private bool CheckLambda()
-        {
-            for (int i = 0; i < N - 1; i++)
-                if (lambda[i] == lambda[i+1]) 
-                    return false;
-            return true;
         }
 
         private void RandomInit()
@@ -150,7 +146,7 @@ namespace Task3
 
         private bool check()
         {
-            return (Solve() == -1 || GetVecAvg() > Math.Pow(10,Math.Max(-3,eps)));
+            return (Solve() == -1 || GetVecAvg() > Math.Pow(10,Math.Max(-3,cnt)));
         }
 
         public double MultiplyRowByCol(double[] row, double[] col)
@@ -174,10 +170,7 @@ namespace Task3
         public double GetVecAvg()
         {
             double[] tmp = GetHousCol();
-            double res = Math.Abs(lambda_vec[0] - tmp[0]);
-            for (int i = 1; i < N; i++)
-                res = Math.Max(res, Math.Abs(lambda_vec[i] - tmp[i]));
-            return res;
+            return Math.Sqrt(2 * (1 - Math.Abs(CosAngleBeetwen(lambda_vec, tmp))));
         }
 
         public void FormAnswer(int countTest, ref double LambdaAvg, ref double VecAvg, ref double r, ref int iter)
